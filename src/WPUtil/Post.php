@@ -22,7 +22,7 @@ class Post
       'name' => $slug,
     ));
 
-    if ($query->found_posts) {
+    if ($query->posts) {
       $id = $query->posts[0]->ID;
 
       if ($options) {
