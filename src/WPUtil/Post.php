@@ -48,4 +48,40 @@ class Post
 
     return $id;
   }
+
+  /*
+  // retrieve the unique post by name. create new post if a post not found
+
+  $post_id = Post::uniquePost('post', 'hello', 'Hello World');
+  */
+  static public function uniquePost($post_type, $post_name, $post_title = null)
+  {
+    if (!(is_string($post_type) && strlen($post_type))) {
+      throw new \Exception('$post_type required');
+    }
+    if (!(is_string($post_name) && strlen($post_name))) {
+      throw new \Exception('$post_name required');
+    }
+
+    $query = new \WP_Query(array(
+      'posts_per_page' => 1,
+      'post_type' => $post_type,
+      'name' => $post_name,
+    ));
+
+    if ($query->found_posts) {
+      if ($query->posts) {
+        return $query->posts[0]->ID;
+      } else {
+        return 0;
+      }
+    } else {
+      return wp_insert_post(array(
+        'post_type' => $post_type,
+        'post_name' => $post_name,
+        'post_title' => $post_title ?: '',
+        'post_status' => 'publish',
+      ));
+    }
+  }
 }
