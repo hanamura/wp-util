@@ -84,4 +84,92 @@ class Post
       ));
     }
   }
+
+  /*
+  // get post by post id or post name
+  */
+  static public function getPost($post)
+  {
+    // falsy
+    // -----
+
+    if (!$post) {
+      return null;
+    }
+
+    // WP_Post
+    // -------
+
+    if ($post instanceof \WP_Post) {
+      return $post;
+    }
+
+    // id
+    // --
+
+    if (is_int($post)) {
+
+      // cache
+
+      $cache = wp_cache_get($post, __CLASS__ . '::' . __METHOD__);
+
+      if ($cache !== false) {
+        return $cache;
+      }
+
+      // get by id
+
+      $post_ = get_post($post);
+
+      wp_cache_set($post, $post_, __CLASS__ . '::' . __METHOD__);
+
+      return $post_;
+    }
+
+    // slug
+    // ----
+
+    if (is_string($post)) {
+
+      // cache
+
+      $cache = wp_cache_get($post, __CLASS__ . '::' . __METHOD__);
+
+      if ($cache !== false) {
+        return $cache;
+      }
+
+      // postname
+
+      $query = new \WP_Query([
+        'pagename' => $post,
+        'posts_per_page' => 1,
+      ]);
+
+      if (isset($query->posts[0])) {
+        wp_cache_set($post, $query->posts[0], __CLASS__ . '::' . __METHOD__);
+        return $query->posts[0];
+      }
+
+      // name
+
+      $query = new \WP_Query([
+        'name' => $post,
+        'posts_per_page' => 1,
+      ]);
+
+      if (isset($query->posts[0])) {
+        wp_cache_set($post, $query->posts[0], __CLASS__ . '::' . __METHOD__);
+        return $query->posts[0];
+      }
+
+      // not found
+
+      wp_cache_set($post, null, __CLASS__ . '::' . __METHOD__);
+
+      return null;
+    }
+
+    return null;
+  }
 }
